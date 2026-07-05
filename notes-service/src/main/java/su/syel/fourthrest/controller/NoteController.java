@@ -1,5 +1,6 @@
 package su.syel.fourthrest.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,13 @@ import java.net.URI;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/notes")
 public class NoteController {
 
     private final NoteService noteService;
     private final ExportService exportService;
 
-    @PostMapping("/notes")
+    @PostMapping("")
     public ResponseEntity<NoteResponseDTO> createNote(
             @Valid @RequestBody NoteRequestDTO note
     ) {
@@ -34,16 +36,18 @@ public class NoteController {
         return ResponseEntity.created(location).body(createdNoteDTO);
     }
 
-    @GetMapping("/notes/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<NoteResponseDTO> getNote(
-            @PathVariable Long id
+            @PathVariable Long id,
+            HttpServletRequest request
     ) {
+        log.info("X-Gateway header: {}", request.getHeader("X-Gateway"));
         log.info("Getting note id={}", id);
         NoteResponseDTO noteResponseDTO = noteService.getNote(id);
         return ResponseEntity.ok().body(noteResponseDTO);
     }
 
-    @PutMapping("/notes/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<NoteResponseDTO> updateNote(
             @PathVariable Long id,
             @Valid @RequestBody NoteRequestDTO note
@@ -54,7 +58,7 @@ public class NoteController {
         return ResponseEntity.ok(updatedNote);
     }
 
-    @DeleteMapping("/notes/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<NoteResponseDTO> deleteNote(
             @PathVariable Long id
     ) {
@@ -64,7 +68,7 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/notes/export")
+    @GetMapping("/export")
     public ResponseEntity<String> exportNote(
             @RequestParam String format
     ) {
