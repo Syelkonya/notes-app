@@ -12,6 +12,7 @@ import su.syel.fourthrest.dto.request.NoteRequestDTO;
 import su.syel.fourthrest.dto.response.NoteResponseDTO;
 import su.syel.fourthrest.exporter.ExportResult;
 import su.syel.fourthrest.exporter.ExportService;
+import su.syel.fourthrest.mapper.NoteMapper;
 import su.syel.fourthrest.service.NoteService;
 
 import java.net.URI;

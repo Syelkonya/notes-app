@@ -12,6 +12,7 @@ import su.syel.fourthrest.config.ConfigProperties;
 import su.syel.fourthrest.dto.request.NoteRequestDTO;
 import su.syel.fourthrest.dto.response.NoteResponseDTO;
 import su.syel.fourthrest.entity.NoteEntity;
+import su.syel.fourthrest.mapper.NoteMapper;
 import su.syel.fourthrest.service.NoteService;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class NoteServiceImpl implements NoteService {
 
     private final ConfigProperties configProperties;
     private final MeterRegistry meterRegistry;
+    private final NoteMapper noteMapper;
     private final ConcurrentHashMap<Long, NoteEntity> storage = new ConcurrentHashMap<>();
     private final AtomicLong idCounter = new AtomicLong(0);
     private final AtomicLong idCounterStorageLength = new AtomicLong(0);
@@ -50,10 +52,10 @@ public class NoteServiceImpl implements NoteService {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Notes limit exceeded");
             }
             Long id = idCounter.incrementAndGet();
-            NoteEntity note = new NoteEntity(id, noteRequestDTO.title(), noteRequestDTO.content(), LocalDateTime.now());
+            NoteEntity note = noteMapper.toEntityWithId(noteRequestDTO, id);
             storage.put(id, note);
             idCounterStorageLength.incrementAndGet();
-            return new NoteResponseDTO(id, note.getTitle(), note.getContent(), note.getTimestamp());
+            return noteMapper.toResponseDTO(note);
         }
     }
 
@@ -64,7 +66,7 @@ public class NoteServiceImpl implements NoteService {
         if (note == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found");
         }
-        return new NoteResponseDTO(id, note.getTitle(), note.getContent(), note.getTimestamp());
+        return noteMapper.toResponseDTO(note);
     }
 
     @Override
@@ -76,7 +78,7 @@ public class NoteServiceImpl implements NoteService {
         note.setTitle(noteRequestDTO.title());
         note.setContent(noteRequestDTO.content());
         storage.put(id, note);
-        return new NoteResponseDTO(id, note.getTitle(), note.getContent(), note.getTimestamp());
+        return noteMapper.toResponseDTO(note);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<NoteResponseDTO> getAllNotes() {
         return storage.values().stream()
-                .map(note -> new NoteResponseDTO(note.getId(), note.getTitle(), note.getContent(), note.getTimestamp()))
+                .map(noteMapper::toResponseDTO)
                 .toList();
     }
 
