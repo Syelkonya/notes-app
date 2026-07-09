@@ -2,7 +2,7 @@ package su.ternovskii.notificationservice.sender;
 
 import org.springframework.stereotype.Service;
 import su.ternovskii.notificationservice.model.Channel;
-import su.ternovskii.notificationservice.model.NotificationRequest;
+import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 
 import java.util.EnumMap;
 import java.util.List;

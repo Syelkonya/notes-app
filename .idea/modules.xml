@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/api-gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api-gateway.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/notes-app.iml" filepath="$PROJECT_DIR$/.idea/notes-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/notes-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/notes-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/notification-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/notification-service.main.iml" />
     </modules>
   </component>
 </project>
