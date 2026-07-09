@@ -13,6 +13,7 @@ import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import su.ternovskii.notificationservice.model.Channel;
 import su.ternovskii.notificationservice.model.NotificationStatus;
 
@@ -43,6 +44,7 @@ public class NotificationEntity {
     @Column(nullable = false)
     private NotificationStatus status;
 
+    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 

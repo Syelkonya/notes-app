@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import su.ternovskii.notificationservice.dto.request.NotificationRequest;
-import su.ternovskii.notificationservice.sender.NotificationService;
+import su.ternovskii.notificationservice.dto.response.NotificationResponse;
+import su.ternovskii.notificationservice.service.NotificationService;
 
 @RestController
 @RequestMapping("/notifications")
@@ -21,10 +22,10 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @PostMapping("")
-    public ResponseEntity<String> createNote(
+    public ResponseEntity<NotificationResponse> createNote(
             @Valid @RequestBody NotificationRequest notificationRequest
     ) {
-        notificationService.sendNotification(notificationRequest);
-        return ResponseEntity.status(HttpStatus.OK).build();
+       NotificationResponse notificationResponse = notificationService.sendNotification(notificationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(notificationResponse);
     }
 }
