@@ -3,6 +3,7 @@ package su.ternovskii.notificationservice.persistence;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 import su.ternovskii.notificationservice.entity.NotificationEntity;
@@ -17,6 +18,7 @@ public class NotificationPersistence {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public NotificationEntity create(NotificationRequest notificationRequest) {
         NotificationEntity notificationEntity = notificationMapper.toEntity(notificationRequest);
         return notificationRepository.save(notificationEntity);

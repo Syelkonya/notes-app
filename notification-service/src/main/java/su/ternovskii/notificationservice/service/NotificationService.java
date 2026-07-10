@@ -29,28 +29,20 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final NotificationDispatcher notificationDispatcher;
-    private final NotificationPersistence notificationPersistence ;
+    private final NotificationPersistence notificationPersistence;
 
+    @Transactional
     public NotificationResponse sendNotification(NotificationRequest notificationRequest) {
         if (!notificationDispatcher.supports(notificationRequest.channel())) {
             throw new IllegalArgumentException("Unknown channel: " + notificationRequest.channel());
         }
 
         NotificationEntity entity = notificationPersistence.create(notificationRequest);
-        log.info("Created notification id={}", entity.getId());
+        log.info("Created notification id={} status=NEW", entity.getId());
 
-        try {
-            notificationDispatcher.dispatch(entity.getChannel(), entity.getMessage());
-            entity = notificationPersistence.updateStatus(entity.getId(), NotificationStatus.SENT);
-            log.info("Sent notification id={}", entity.getId());
-        } catch (Exception e) {
-            entity = notificationPersistence.updateStatus(entity.getId(), NotificationStatus.FAILED);
-            log.error("Failed notification id={}", entity.getId(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Sending failed", e);
-        }
-
+        notificationDispatcher.dispatch(entity.getChannel(), entity.getMessage());
+        entity = notificationPersistence.updateStatus(entity.getId(), NotificationStatus.SENT);
         return notificationMapper.toResponse(entity);
-
     }
 
 }
