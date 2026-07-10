@@ -4,6 +4,7 @@ import su.ternovskii.notificationservice.model.Channel;
 import su.ternovskii.notificationservice.model.NotificationStatus;
 
 import java.time.Instant;
+import java.util.List;
 
 public record NotificationResponse(
         Long id,
@@ -12,6 +13,7 @@ public record NotificationResponse(
         String message,
         NotificationStatus status,
         Instant createdAt,
-        Long version
+        Long version,
+        List<DeliveryAttemptResponse> deliveryAttempts
 ) {
 }

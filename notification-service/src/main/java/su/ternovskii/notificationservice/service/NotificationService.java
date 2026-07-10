@@ -2,24 +2,17 @@ package su.ternovskii.notificationservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import su.ternovskii.notificationservice.dispatcher.NotificationDispatcher;
 import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 import su.ternovskii.notificationservice.dto.response.NotificationResponse;
 import su.ternovskii.notificationservice.entity.NotificationEntity;
 import su.ternovskii.notificationservice.mapper.NotificationMapper;
-import su.ternovskii.notificationservice.model.Channel;
 import su.ternovskii.notificationservice.model.NotificationStatus;
 import su.ternovskii.notificationservice.persistence.NotificationPersistence;
-import su.ternovskii.notificationservice.repository.NotificationRepository;
-import su.ternovskii.notificationservice.sender.NotificationSender;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -45,4 +38,13 @@ public class NotificationService {
         return notificationMapper.toResponse(entity);
     }
 
+    public NotificationResponse getNotificationResponse(Long id) {
+        NotificationEntity notificationEntity = notificationPersistence.get(id);
+        return notificationMapper.toResponse(notificationEntity);
+    }
+
+    public List<NotificationResponse> getAll() {
+        List<NotificationEntity> notifications = notificationPersistence.findAll();
+        return notificationMapper.toResponseList(notifications);
+    }
 }

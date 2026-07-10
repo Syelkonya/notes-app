@@ -6,6 +6,8 @@ import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 import su.ternovskii.notificationservice.dto.response.NotificationResponse;
 import su.ternovskii.notificationservice.entity.NotificationEntity;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
@@ -17,4 +19,5 @@ public interface NotificationMapper {
 
     NotificationResponse toResponse(NotificationEntity notificationEntity);
 
+    List<NotificationResponse> toResponseList(List<NotificationEntity> notifications);
 }
