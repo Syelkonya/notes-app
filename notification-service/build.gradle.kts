@@ -42,7 +42,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testCompileOnly("org.projectlombok:lombok:1.18.46")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.46")
 }
 
 extra["springCloudVersion"] = "2025.1.2"
@@ -55,4 +59,6 @@ dependencyManagement {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // разрешает Mockito динамически загружать агент на Java 21+ без предупреждений
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
 }
