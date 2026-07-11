@@ -8,6 +8,7 @@ import su.ternovskii.notificationservice.dispatcher.NotificationDispatcher;
 import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 import su.ternovskii.notificationservice.dto.response.NotificationResponse;
 import su.ternovskii.notificationservice.entity.NotificationEntity;
+import su.ternovskii.notificationservice.entity.NotificationTemplateEntity;
 import su.ternovskii.notificationservice.mapper.NotificationMapper;
 import su.ternovskii.notificationservice.model.NotificationStatus;
 import su.ternovskii.notificationservice.persistence.NotificationPersistence;
@@ -23,6 +24,7 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final NotificationDispatcher notificationDispatcher;
     private final NotificationPersistence notificationPersistence;
+    private final NotificationTemplateService notificationTemplateService;
 
     @Transactional
     public NotificationResponse sendNotification(NotificationRequest notificationRequest) {
@@ -33,7 +35,13 @@ public class NotificationService {
         NotificationEntity entity = notificationPersistence.create(notificationRequest);
         log.info("Created notification id={} status=NEW", entity.getId());
 
-        notificationDispatcher.dispatch(entity.getChannel(), entity.getMessage());
+        NotificationTemplateEntity notificationTemplateEntity =
+                notificationTemplateService.getByChannel(notificationRequest.channel());
+
+        notificationDispatcher.dispatch(
+                notificationTemplateEntity.getChannel(),
+                notificationTemplateEntity.getText().replace("{message}", entity.getMessage()));
+
         entity = notificationPersistence.updateStatus(entity.getId(), NotificationStatus.SENT);
         return notificationMapper.toResponse(entity);
     }
