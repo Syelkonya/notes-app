@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import su.ternovskii.notificationservice.model.DeliveryAttemptStatus;
-import su.ternovskii.notificationservice.model.NotificationStatus;
 
 import java.time.Instant;
 

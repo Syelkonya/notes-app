@@ -2,6 +2,7 @@ package su.ternovskii.notificationservice.persistence;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import su.ternovskii.notificationservice.repository.NotificationRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationPersistence {
@@ -46,5 +48,16 @@ public class NotificationPersistence {
 
     public List<NotificationEntity> findByRecipientOrderByCreatedAtDesc(String recipient) {
         return notificationRepository.findByRecipientOrderByCreatedAtDesc(recipient);
+    }
+
+    @Transactional
+    public void registerFailedAttempt(Long id, int maxRetries) {
+        NotificationEntity entity = get(id);
+        entity.setRetryCount(entity.getRetryCount() + 1);
+        if (entity.getRetryCount() >= maxRetries) {
+            entity.setStatus(NotificationStatus.FAILED);
+            log.error("Notification id={} exceeded {} retries, marked as FAILED", id, maxRetries);
+        }
+        notificationRepository.save(entity);
     }
 }

@@ -62,4 +62,7 @@ public class NotificationEntity {
 
     @OneToMany(mappedBy = "notificationEntity", fetch = FetchType.LAZY)
     private List<DeliveryAttemptEntity> deliveryAttempts;
+
+    @Column(nullable = false)
+    private int retryCount = 0;
 }
