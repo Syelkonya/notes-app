@@ -49,4 +49,13 @@ public class NotificationController {
         // маппер обращается к getDeliveryAttempts() для каждой — вот тут N+1
         return ResponseEntity.ok(notifications);
     }
+
+    @GetMapping("/by-recipient/{recipient}")
+    public ResponseEntity<List<NotificationResponse>> getNotification(
+            @PathVariable String recipient
+    ) {
+        List<NotificationResponse> notificationResponseList =
+                notificationService.getNotificationResponseListByRecipientAndCreatedAtDesc(recipient);
+        return ResponseEntity.status(HttpStatus.OK).body(notificationResponseList);
+    }
 }

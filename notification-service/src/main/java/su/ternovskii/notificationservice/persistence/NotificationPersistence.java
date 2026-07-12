@@ -43,4 +43,8 @@ public class NotificationPersistence {
     public List<NotificationEntity> findAll() {
         return notificationRepository.findAll();
     }
+
+    public List<NotificationEntity> findByRecipientOrderByCreatedAtDesc(String recipient) {
+        return notificationRepository.findByRecipientOrderByCreatedAtDesc(recipient);
+    }
 }

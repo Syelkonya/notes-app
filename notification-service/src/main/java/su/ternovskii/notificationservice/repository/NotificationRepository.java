@@ -11,4 +11,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     @EntityGraph(attributePaths = "deliveryAttempts")
      List<NotificationEntity> findAll();
 
+    List<NotificationEntity> findByRecipientOrderByCreatedAtDesc(String recipient);
+
 }

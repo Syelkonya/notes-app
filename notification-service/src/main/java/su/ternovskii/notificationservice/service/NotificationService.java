@@ -55,4 +55,10 @@ public class NotificationService {
         List<NotificationEntity> notifications = notificationPersistence.findAll();
         return notificationMapper.toResponseList(notifications);
     }
+
+    public List<NotificationResponse> getNotificationResponseListByRecipientAndCreatedAtDesc(String recipient) {
+        List<NotificationEntity> notifications = notificationPersistence.findByRecipientOrderByCreatedAtDesc(recipient);
+        return notificationMapper.toResponseList(notifications);
+    }
+
 }
