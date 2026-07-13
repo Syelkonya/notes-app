@@ -6,6 +6,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionTemplate;
 import su.ternovskii.notificationservice.entity.NotificationTemplateEntity;
@@ -22,12 +26,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // Полный Spring-контекст с реальной PostgreSQL; Eureka отключена — в тестах не нужна
 @Slf4j
+@Testcontainers
 @SpringBootTest(properties = {"eureka.client.enabled=false", "spring.cloud.discovery.enabled=false"})
 class NotificationTemplateOptimisticLockTest {
 
     // @Autowired на поле — способ инжекции в JUnit-тестах (@RequiredArgsConstructor здесь не работает)
     @Autowired
     private NotificationTemplateRepository notificationTemplateRepository;
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
     // TransactionTemplate даёт явный контроль над границами транзакции прямо в коде теста
     @Autowired
@@ -38,11 +47,11 @@ class NotificationTemplateOptimisticLockTest {
 
     @BeforeEach
     void setUp() {
-        tearDown();
+        notificationTemplateRepository.deleteAll();
 
         NotificationTemplateEntity template = new NotificationTemplateEntity();
         template.setChannel(Channel.EMAIL);
-        template.setText("Начальный текст");
+        template.setText("Начальный текст {message}");
 
         // execute() = BEGIN → лямбда → COMMIT; сохраняем до старта потоков
         NotificationTemplateEntity saved = transactionTemplate.execute(
@@ -51,15 +60,6 @@ class NotificationTemplateOptimisticLockTest {
 
         templateId = saved.getId();
         log.info("[setUp] Шаблон создан: id={}, version={}", templateId, saved.getVersion());
-    }
-
-    @AfterEach
-    void tearDown() {
-        // executeWithoutResult — то же что execute(), но без возвращаемого значения
-        transactionTemplate.executeWithoutResult(
-                status -> notificationTemplateRepository.deleteAll()
-        );
-        log.info("[tearDown] Таблица очищена");
     }
 
     @Test

@@ -44,6 +44,11 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:postgresql:1.21.4")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testCompileOnly("org.projectlombok:lombok:1.18.46")
