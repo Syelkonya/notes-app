@@ -50,6 +50,10 @@ public class NotificationPersistence {
         return notificationRepository.findByRecipientOrderByCreatedAtDesc(recipient);
     }
 
+    public List<NotificationEntity> findPendingForRetry(NotificationStatus status, int maxRetries) {
+        return notificationRepository.findByStatusAndRetryCountLessThan(status, maxRetries);
+    }
+
     @Transactional
     public void registerFailedAttempt(Long id, int maxRetries) {
         NotificationEntity entity = get(id);

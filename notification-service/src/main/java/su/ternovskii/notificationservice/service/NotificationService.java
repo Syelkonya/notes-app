@@ -61,4 +61,19 @@ public class NotificationService {
         return notificationMapper.toResponseList(notifications);
     }
 
+    public void retryPendingNotifications(int maxRetries) {
+        List<NotificationEntity> pending = notificationPersistence.findPendingForRetry(NotificationStatus.NEW, maxRetries);
+        log.info("Retry scheduler: found {} pending notifications", pending.size());
+
+        for (NotificationEntity n : pending) {
+            try {
+                notificationDispatcher.dispatch(n.getChannel(), n.getMessage());
+                notificationPersistence.updateStatus(n.getId(), NotificationStatus.SENT);
+            } catch (Exception e) {
+                log.info(e.getMessage());
+                notificationPersistence.registerFailedAttempt(n.getId(), maxRetries);
+            }
+        }
+    }
+
 }
