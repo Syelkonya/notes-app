@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import su.ternovskii.notificationservice.dispatcher.NotificationDispatcher;
+import su.ternovskii.notificationservice.dto.kafka.NotificationCommand;
 import su.ternovskii.notificationservice.dto.request.NotificationRequest;
 import su.ternovskii.notificationservice.dto.response.NotificationResponse;
 import su.ternovskii.notificationservice.entity.NotificationEntity;
 import su.ternovskii.notificationservice.entity.NotificationTemplateEntity;
+import su.ternovskii.notificationservice.kafka.NotificationKafkaProducer;
 import su.ternovskii.notificationservice.mapper.NotificationMapper;
 import su.ternovskii.notificationservice.model.NotificationStatus;
 import su.ternovskii.notificationservice.persistence.NotificationPersistence;
@@ -25,24 +27,29 @@ public class NotificationService {
     private final NotificationDispatcher notificationDispatcher;
     private final NotificationPersistence notificationPersistence;
     private final NotificationTemplateService notificationTemplateService;
+    private final NotificationKafkaProducer notificationKafkaProducer;
 
     @Transactional
     public NotificationResponse sendNotification(NotificationRequest notificationRequest) {
-        if (!notificationDispatcher.supports(notificationRequest.channel())) {
-            throw new IllegalArgumentException("Unknown channel: " + notificationRequest.channel());
-        }
-
         NotificationEntity entity = notificationPersistence.create(notificationRequest);
         log.info("Created notification id={} status=NEW", entity.getId());
 
-        NotificationTemplateEntity notificationTemplateEntity =
+        NotificationTemplateEntity template =
                 notificationTemplateService.getByChannel(notificationRequest.channel());
 
-        notificationDispatcher.dispatch(
-                notificationTemplateEntity.getChannel(),
-                notificationTemplateEntity.getText().replace("{message}", entity.getMessage()));
+        String renderedMessage = template.getText().replace("{message}", entity.getMessage());
 
-        entity = notificationPersistence.updateStatus(entity.getId(), NotificationStatus.SENT);
+        NotificationCommand command = new NotificationCommand(
+                entity.getId(),
+                template.getChannel(),
+                entity.getRecipient(),
+                renderedMessage
+        );
+
+        notificationKafkaProducer.sendCommand(command);
+        log.info("Command sent to Kafka for notificationId={}, channel={}",
+                entity.getId(), template.getChannel());
+
         return notificationMapper.toResponse(entity);
     }
 
