@@ -23,7 +23,8 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.46")
 
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+    implementation("tools.jackson.core:jackson-databind")
 }
 
 tasks.withType<Test> {
