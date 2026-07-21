@@ -23,11 +23,12 @@ public class NotificationKafkaProducer {
         kafkaTemplate.send(topic, key, command);
     }
 
-    private String resolveTopicName(Channel channel) {
+    private String resolveTopicName(String channel) {
         return switch (channel) {
-            case SMS   -> "notification.sms.send";
-            case PUSH  -> "notification.push.send";
-            case EMAIL -> "notification.email.send";
+            case "SMS"   -> "notification.sms.send";
+            case "PUSH"  -> "notification.push.send";
+            case "EMAIL" -> "notification.email.send";
+            default -> throw new IllegalStateException("Unexpected value: " + channel);
         };
     }
 }
