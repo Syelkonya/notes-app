@@ -8,34 +8,34 @@ import org.springframework.stereotype.Component;
 import su.ternovskii.emailadapter.dto.NotificationCommand;
 import su.ternovskii.emailadapter.dto.NotificationResult;
 
+import java.util.Random;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class EmailListener {
 
     private final KafkaTemplate<String, NotificationResult> kafkaTemplate;
+    private final Random random = new Random();
 
     @KafkaListener(topics = "notification.email.send", groupId = "email-adapter")
     public void handle(NotificationCommand command) {
-        log.info("EMAIL adapter received: notificationId={}, recipient={}",
-                command.notificationId(), command.recipient());
+        log.info("Email adapter received: notificationId={}", command.notificationId());
 
-        // Эмуляция отправки EMAIL (всегда успех для EMAIL)
-        boolean success = true;
+        // Эмуляция: 20% сообщений «не доставлены»
+        boolean success = random.nextInt(100) >= 20;  // 80% успех, 20% неудача
         String error = null;
 
-        log.info("EMAIL sent successfully for notificationId={}", command.notificationId());
+        if (success) {
+            log.info("Email sent successfully for notificationId={}", command.notificationId());
+        } else {
+            error = "Email gateway unavailable (simulated failure)";
+            log.warn("Email FAILED for notificationId={}: {}", command.notificationId(), error);
+        }
 
-        // Отправляем результат обратно в Kafka
         NotificationResult result = new NotificationResult(
-                command.notificationId(),
-                "EMAIL",
-                success,
-                error
-        );
+                command.notificationId(), "EMAIL", success, error);
         kafkaTemplate.send("notification.result",
                 String.valueOf(command.notificationId()), result);
-
-        log.info("EMAIL result sent to notification.result: success={}", success);
     }
 }
