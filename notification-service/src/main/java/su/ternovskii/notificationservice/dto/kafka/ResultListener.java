@@ -23,35 +23,32 @@ public class ResultListener {
     @Transactional
     @KafkaListener(topics = "notification.result", groupId = "notification-service")
     public void handleResult(NotificationResult result) {
-        log.info("Received result: notificationId={}, channel={}, success={}",
-                result.notificationId(), result.channel(), result.success());
-
-        // Парсим channel из строки
         Channel channel = Channel.valueOf(result.channel());
 
-        // Ищем запись ChannelDelivery
         ChannelDeliveryEntity delivery = channelDeliveryRepository
                 .findByNotificationIdAndChannel(result.notificationId(), channel)
                 .orElse(null);
 
         if (delivery == null) {
-            log.warn("ChannelDelivery not found for notificationId={}, channel={}",
+            log.warn("ChannelDelivery not found: notificationId={}, channel={}",
+                    result.notificationId(), result.channel());
+            return;
+        }
+
+        // ИДЕМПОТЕНТНОСТЬ: если этот канал уже SENT — игнорируем дубликат результата
+        if (delivery.getStatus() == DeliveryStatus.SENT) {
+            log.info("Duplicate result ignored: notificationId={}, channel={} already SENT",
                     result.notificationId(), result.channel());
             return;
         }
 
         if (result.success()) {
-            // Успех — ставим SENT, retry не нужен
             delivery.setStatus(DeliveryStatus.SENT);
             delivery.setNextRetryAt(null);
-            log.info("Channel {} SENT for notificationId={}", channel, result.notificationId());
         } else {
-            // Неудача — ставим FAILED, планируем retry через 1 минуту
             delivery.setStatus(DeliveryStatus.FAILED);
             delivery.setRetryCount(delivery.getRetryCount() + 1);
             delivery.setNextRetryAt(Instant.now().plusSeconds(60));
-            log.warn("Channel {} FAILED for notificationId={}, retry #{} scheduled",
-                    channel, result.notificationId(), delivery.getRetryCount());
         }
 
         channelDeliveryRepository.save(delivery);

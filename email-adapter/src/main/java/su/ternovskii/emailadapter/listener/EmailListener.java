@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import su.ternovskii.emailadapter.dto.NotificationCommand;
 import su.ternovskii.emailadapter.dto.NotificationResult;
@@ -19,7 +20,7 @@ public class EmailListener {
     private final Random random = new Random();
 
     @KafkaListener(topics = "notification.email.send", groupId = "email-adapter")
-    public void handle(NotificationCommand command) {
+    public void handle(NotificationCommand command, Acknowledgment ack) {
         log.info("Email adapter received: notificationId={}", command.notificationId());
 
         // Эмуляция: 20% сообщений «не доставлены»
@@ -37,5 +38,7 @@ public class EmailListener {
                 command.notificationId(), "EMAIL", success, error);
         kafkaTemplate.send("notification.result",
                 String.valueOf(command.notificationId()), result);
+
+        ack.acknowledge();
     }
 }
